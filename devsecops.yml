@@ -1,0 +1,66 @@
+name: DevSecOps Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  devsecops:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Java (required for Sonar)
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3️⃣ SonarQube SAST Scan
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=Pipeline_Security
+            -Dsonar.sources=.
+            -Dsonar.host.url=http://34.32.108.107:9000 
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # 4️⃣ Enforce Quality Gate
+      - name: Sonar Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # 5️⃣ Install Trivy
+        - name: Install Trivy
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+            wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+            echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+            sudo apt-get update
+            sudo apt-get install -y trivy
+
+        # 6️⃣ Dependency + Secret Scan (Filesystem)
+        - name: Trivy FS Scan
+          run: |
+            trivy fs . --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1
+
+      # 7️⃣ Build Docker Image
+      - name: Build Docker image
+        run: |
+          docker build -t pipeline-security:latest .
+
+      # 8️⃣ Scan Docker Image
+      - name: Trivy Image Scan
+        run: |
+          trivy image --exit-code 1 --severity CRITICAL,HIGH pipeline-security:latest
