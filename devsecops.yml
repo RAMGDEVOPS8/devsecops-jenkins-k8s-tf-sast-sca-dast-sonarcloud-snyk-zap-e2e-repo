@@ -28,8 +28,9 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Pipeline_Security
-            -Dsonar.sources=.
+            -Dsonar.sources=.            
             -Dsonar.host.url=http://34.32.108.107:9000 
+           # Make sure to replace the host URL with your actual SonarQube server URL 
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -41,19 +42,19 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       # 5️⃣ Install Trivy
-        - name: Install Trivy
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-            wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-            echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-            sudo apt-get update
-            sudo apt-get install -y trivy
+      - name: Install Trivy
+        run: |
+        sudo apt-get update
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
 
-        # 6️⃣ Dependency + Secret Scan (Filesystem)
-        - name: Trivy FS Scan
-          run: |
-            trivy fs . --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1
+      # 6️⃣ Dependency + Secret Scan (Filesystem)
+      - name: Trivy FS Scan
+        run: |
+        trivy fs . --scanners vuln,secret --severity HIGH,CRITICAL --exit-code 1
 
       # 7️⃣ Build Docker Image
       - name: Build Docker image
