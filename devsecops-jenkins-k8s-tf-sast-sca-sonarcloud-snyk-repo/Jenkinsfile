@@ -5,10 +5,11 @@ pipeline {
     }
    stages{
     stage('CompileandRunSonarAnalysis') {
-            steps {	
+            steps{
+				dir('devsecops-jenkins-k8s-tf-sast-sca-sonarcloud-snyk-repo') {	
 		sh 'mvn clean verify sonar:sonar -Dsonar.projectKey=ram-gs -Dsonar.organization=RAM_GS -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=56cd3f47c2ec02f10c59b6aed4f556c1f46f6774'
 			}
-    }
+    }}
 
 	stage('RunSCAAnalysisUsingSnyk') {
             steps {		
