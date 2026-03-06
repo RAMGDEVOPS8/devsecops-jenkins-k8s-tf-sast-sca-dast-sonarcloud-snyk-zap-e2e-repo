@@ -12,11 +12,12 @@ pipeline {
     }}
 
 	stage('RunSCAAnalysisUsingSnyk') {
-            steps {		
+            steps {	
+				dir('devsecops-jenkins-k8s-tf-sast-sca-sonarcloud-snyk-repo') {
 				withCredentials([string(credentialsId: 'SNYK_TOKEN', variable: 'SNYK_TOKEN')]) {
 					sh 'mvn snyk:test -fn'
 				}
-			}
+			}}
     }		
   }
 }
