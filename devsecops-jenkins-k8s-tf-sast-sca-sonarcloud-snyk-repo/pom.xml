@@ -302,7 +302,6 @@
 				</executions>
 			</plugin>
 			<!--# Changes for Software Composition Analysis Scan using Snyk
-#By ASecurityGuru
 -->
     <plugin>
       <groupId>io.snyk</groupId>
@@ -310,7 +309,7 @@
       <version>2.0.0</version>
       <inherited>false</inherited>
       <configuration>
-        <org>asecurityguru</org>
+        <org>sumitgautam579</org>
       </configuration>
     </plugin>
 <!-- Snyk Changes for SCA Ends Here -->
