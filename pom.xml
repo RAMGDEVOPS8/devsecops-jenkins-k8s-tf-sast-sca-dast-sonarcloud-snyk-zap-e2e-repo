@@ -311,7 +311,8 @@
       <version>2.0.0</version>
       <inherited>false</inherited>
       <configuration>
-        <org>asecurityguru</org>
+        <org>RAM</org>
+		  <apiToken>${SNYK_token}</apiToken>
       </configuration>
     </plugin>
 <!-- Snyk Changes for SCA Ends Here -->
