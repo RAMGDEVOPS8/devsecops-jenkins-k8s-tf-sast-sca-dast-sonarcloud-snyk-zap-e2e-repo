@@ -22,7 +22,7 @@ pipeline {
             steps { 
                withDockerRegistry([credentialsId: "dockerlogin", url: ""]) {
                  script{
-                 app =  docker.build("asg")
+                 app =  docker.build("ram_devsecops")
                  }
                }
             }
@@ -31,14 +31,14 @@ pipeline {
 	stage('Push') {
             steps {
                 script{
-                    docker.withRegistry('https://145988340565.dkr.ecr.us-west-2.amazonaws.com', 'ecr:us-west-2:aws-credentials') {
+                    docker.withRegistry('https://261399255188.dkr.ecr.ap-south-1.amazonaws.com/ram_devsecops', 'ecr:us-west-2:aws-credentials') {
                     app.push("latest")
                     }
                 }
             }
     	}
 	   
-	stage('Kubernetes Deployment of ASG Bugg Web Application') {
+	/*stage('Kubernetes Deployment of  Bugg Web Application') {
 	   steps {
 	      withKubeConfig([credentialsId: 'kubelogin']) {
 		  sh('kubectl delete all --all -n devsecops')
@@ -60,6 +60,6 @@ pipeline {
 				archiveArtifacts artifacts: 'zap_report.html'
 		    }
 	     }
-       } 
+       } */
   }
 }
