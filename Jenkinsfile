@@ -63,15 +63,21 @@ stage('RunDASTUsingZAP') {
             HOST=$(kubectl get svc rambuggy -n devsecops -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
             echo "Scanning: http://$HOST"
-            chmod -R 777 "$WORKSPACE"
+            # Remove old reports if they exist
+             rm -f "$WORKSPACE/zap_report.html"
+             rm -f "$WORKSPACE/zap.yaml"
+			 
             docker run --rm \
-              --user root \
+              --user $(id -u):$(id -g) \
               -v "$WORKSPACE:/zap/wrk" \
               ghcr.io/zaproxy/zaproxy:stable \
               zap-baseline.py \
               -t "http://$HOST" \
               -r zap_report.html \
 			  -I || true
+
+			echo "Checking report..."
+            ls -lh "$WORKSPACE"
             '''
         }
 
