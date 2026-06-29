@@ -56,13 +56,19 @@ stage('RunSCAAnalysisUsingSnyk') {
 	   	}
 	   }
 	   
-	stage('RunDASTUsingZAP') {
-          steps {
-		    withKubeConfig([credentialsId: 'kubelogin']) {
-				sh('zap.sh -cmd -quickurl http://$(kubectl get services/rambuggy --namespace=devsecops -o json| jq -r ".status.loadBalancer.ingress[] | .hostname") -quickprogress -quickout ${WORKSPACE}/zap_report.html')
-				archiveArtifacts artifacts: 'zap_report.html'
-		    }
-	     }
-       } 
+	stage('DAST Scan') {
+    steps {
+        sh '''
+        docker pull ghcr.io/zaproxy/zaproxy:stable
+
+        docker run --rm \
+          -v $WORKSPACE:/zap/wrk \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py \
+          -t http://$(kubectl get svc rambuggy -n devsecops -o jsonpath='{.status.loadBalancer.ingress[0].hostname}') \
+          -r zap_report.html
+        '''
+           }
+    } 
   }
 }
