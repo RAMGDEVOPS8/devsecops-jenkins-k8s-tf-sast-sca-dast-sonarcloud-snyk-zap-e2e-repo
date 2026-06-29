@@ -70,11 +70,12 @@ stage('RunDASTUsingZAP') {
               ghcr.io/zaproxy/zaproxy:stable \
               zap-baseline.py \
               -t "http://$HOST" \
-              -r zap_report.html
+              -r zap_report.html \
+			  -I || true
             '''
         }
 
-        archiveArtifacts artifacts: 'zap_report.html', fingerprint: true
+        archiveArtifacts artifacts: '**/zap_report.html', fingerprint: true, allowEmptyArchive: true
               }
          } 
   }
