@@ -56,33 +56,32 @@ stage('RunSCAAnalysisUsingSnyk') {
 	   	}
 	   }
 	   
-stage('RunDASTUsingZAP') {
-    steps {
-        withKubeConfig([credentialsId: 'kubelogin']) {
+    stage('RunDASTUsingZAP') {
+       steps {
+            withKubeConfig([credentialsId: 'kubelogin']) {
             sh '''
             HOST=$(kubectl get svc rambuggy -n devsecops -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
 
             echo "Scanning: http://$HOST"
-            # Remove old reports if they exist
-             rm -f "$WORKSPACE/zap_report.html"
-             rm -f "$WORKSPACE/zap.yaml"
-			 
-            docker run --rm \
-              --user $(id -u):$(id -g) \
+            rm -f "$WORKSPACE/zap_report.html"
+            rm -f "$WORKSPACE/zap.yaml"
+
+            chmod -R 777 "$WORKSPACE"
+
+            docker run --rm --user root \
               -v "$WORKSPACE:/zap/wrk" \
               ghcr.io/zaproxy/zaproxy:stable \
               zap-baseline.py \
               -t "http://$HOST" \
               -r zap_report.html \
-			  -I || true
+              -I || true
 
-			echo "Checking report..."
+            echo "Checking report..."
             ls -lh "$WORKSPACE"
             '''
         }
-
         archiveArtifacts artifacts: '**/zap_report.html', fingerprint: true, allowEmptyArchive: true
-              }
-         } 
+    }
+}
   }
 }
