@@ -14,9 +14,10 @@ stage('RunSCAAnalysisUsingSnyk') {
     steps {
         withCredentials([string(credentialsId: 'SNYK_token', variable: 'SNYK_token')]) {
             sh '''
-            mvn snyk:test --json > snyk-report.json || true
+            mvn snyk:test -Dsnyk.token=$SNYK_token -DjsonOutputPath=snyk-report.json || true
+            cat snyk-report.json || echo "No report generated"
             '''
-            archiveArtifacts 'snyk-report.json'
+            archiveArtifacts artifacts: 'snyk-report.json', allowEmptyArchive: true
         }
     }
 }
